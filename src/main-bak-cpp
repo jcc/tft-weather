@@ -3,222 +3,222 @@
 #include <SPIFFS.h>
 
 #include <SPI.h>
-// #include <TFT_eSPI.h>       // Hardware-specific library
+#include <TFT_eSPI.h>       // Hardware-specific library
 
-// #include <Wire.h>
-// #include "CST816T.h"
+#include <Wire.h>
+#include "CST816T.h"
 
-// #include <WiFi.h>
-// #include <HTTPClient.h>
-// #include <ArduinoJson.h>
-// #include <stdio.h>
-// #include <string.h>
-// #include <time.h>
-// #include <NTPClient.h>
-// #include <WiFiUdp.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
-// #include <PNGdec.h>
-// #include "images/user.h"
-// // #include "fonts/malgunFont24pt.h"
+#include <PNGdec.h>
+#include "images/user.h"
+// #include "fonts/malgunFont24pt.h"
 
-// #define I2C_SDA 16
-// #define I2C_SCL 15
-// #define RST_N_PIN 17
-// #define INT_N_PIN 26
+#define I2C_SDA 16
+#define I2C_SCL 15
+#define RST_N_PIN 17
+#define INT_N_PIN 26
 #define TFT_BLC   23
 
-// WiFiUDP ntpUDP;
-// NTPClient timeClient(ntpUDP, "ntp.ntsc.ac.cn", 8 * 3600, 60000);
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "ntp.ntsc.ac.cn", 8 * 3600, 60000);
 
-// // WiFi
-// const char* ssid     = "HD-EDU"; // Change this to your WiFi SSID
-// const char* password = "HD66668888"; // Change this to your WiFi password
+// WiFi
+const char* ssid     = "HD-EDU"; // Change this to your WiFi SSID
+const char* password = "HD66668888"; // Change this to your WiFi password
 
-// CST816T cst816t(I2C_SDA, I2C_SCL, RST_N_PIN, INT_N_PIN); 
+CST816T cst816t(I2C_SDA, I2C_SCL, RST_N_PIN, INT_N_PIN); 
 
-// TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
+TFT_eSPI tft = TFT_eSPI();  // Invoke custom library
 
-// PNG png; // PNG decoder instance
+PNG png; // PNG decoder instance
 
-// #define MAX_IMAGE_WIDTH 240 // Adjust for your images
+#define MAX_IMAGE_WIDTH 240 // Adjust for your images
 
-// int16_t xpos = 0;
-// int16_t ypos = 0;
+int16_t xpos = 0;
+int16_t ypos = 0;
 
-// int current_image_index = 0;
+int current_image_index = 0;
 
-// void pngDraw(PNGDRAW *pDraw) {
-//   uint16_t lineBuffer[MAX_IMAGE_WIDTH];          // Line buffer for rendering
-//   uint8_t  maskBuffer[1 + MAX_IMAGE_WIDTH / 8];  // Mask buffer
+void pngDraw(PNGDRAW *pDraw) {
+  uint16_t lineBuffer[MAX_IMAGE_WIDTH];          // Line buffer for rendering
+  uint8_t  maskBuffer[1 + MAX_IMAGE_WIDTH / 8];  // Mask buffer
 
-//   png.getLineAsRGB565(pDraw, lineBuffer, PNG_RGB565_BIG_ENDIAN, 0xffffffff);
+  png.getLineAsRGB565(pDraw, lineBuffer, PNG_RGB565_BIG_ENDIAN, 0xffffffff);
 
-//   if (png.getAlphaMask(pDraw, maskBuffer, 255)) {
-//     // Note: pushMaskedImage is for pushing to the TFT and will not work pushing into a sprite
-//     tft.pushMaskedImage(xpos, ypos + pDraw->y, pDraw->iWidth, 1, lineBuffer, maskBuffer);
-//   }
-// }
+  if (png.getAlphaMask(pDraw, maskBuffer, 255)) {
+    // Note: pushMaskedImage is for pushing to the TFT and will not work pushing into a sprite
+    tft.pushMaskedImage(xpos, ypos + pDraw->y, pDraw->iWidth, 1, lineBuffer, maskBuffer);
+  }
+}
 
-// void drawSpacer() {
-//   uint16_t pngw = 0, pngh = 0; // To store width and height of image
+void drawSpacer() {
+  uint16_t pngw = 0, pngh = 0; // To store width and height of image
 
-//   int16_t rc;
+  int16_t rc;
 
-//   xpos = 70;
-//   ypos = 150;
+  xpos = 70;
+  ypos = 150;
 
-//   rc = png.openFLASH((uint8_t *)image_data[current_image_index], image_len[current_image_index], pngDraw);
+  rc = png.openFLASH((uint8_t *)image_data[current_image_index], image_len[current_image_index], pngDraw);
 
-//   // 打开当前图像
-//   if (rc == PNG_SUCCESS) {
-//     // Serial.println("Successfully opened png file");
-//     pngw = png.getWidth();
-//     pngh = png.getHeight();
-//     // Serial.printf("Image metrics: (%d x %d), %d bpp, pixel type: %d\n", pngw, pngh, png.getBpp(), png.getPixelType());
+  // 打开当前图像
+  if (rc == PNG_SUCCESS) {
+    // Serial.println("Successfully opened png file");
+    pngw = png.getWidth();
+    pngh = png.getHeight();
+    // Serial.printf("Image metrics: (%d x %d), %d bpp, pixel type: %d\n", pngw, pngh, png.getBpp(), png.getPixelType());
 
-//     // 使用 DMA 传输图像数据
-//     tft.startWrite();
-//     uint32_t dt = millis();
-//     rc = png.decode(NULL, 0);
-//     // Serial.print(millis() - dt); Serial.println("ms");
-//     tft.endWrite();
-//   } else {
-//     Serial.printf("PNG open result: %d\n", rc);
-//   }
+    // 使用 DMA 传输图像数据
+    tft.startWrite();
+    uint32_t dt = millis();
+    rc = png.decode(NULL, 0);
+    // Serial.print(millis() - dt); Serial.println("ms");
+    tft.endWrite();
+  } else {
+    Serial.printf("PNG open result: %d\n", rc);
+  }
 
-//   // 切换到下一个图像
-//   current_image_index = (current_image_index + 1) % (sizeof(image_data) / sizeof(image_data[0]));
+  // 切换到下一个图像
+  current_image_index = (current_image_index + 1) % (sizeof(image_data) / sizeof(image_data[0]));
 
-//   delay(100); // 延迟 250 毫秒
-// }
+  delay(100); // 延迟 250 毫秒
+}
 
 
-// String url = "http://apis.juhe.cn/simpleWeather/query";
-// String city = "深圳";
-// String key = "0b34bb4e66b41c3710a06b6723924138";
+String url = "http://apis.juhe.cn/simpleWeather/query";
+String city = "深圳";
+String key = "0b34bb4e66b41c3710a06b6723924138";
 
-// unsigned long lastUpdateTime = 0; // 上次更新时间
-// const unsigned long updateInterval = 3600000; // 1小时更新一次
+unsigned long lastUpdateTime = 0; // 上次更新时间
+const unsigned long updateInterval = 3600000; // 1小时更新一次
 
-// char daysOfTheWeek[7][12] = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
+char daysOfTheWeek[7][12] = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
 
-// // 天气字段
-// unsigned int temp;
-// String info;
-// String weather;
-// String direct;
+// 天气字段
+unsigned int temp;
+String info;
+String weather;
+String direct;
 
-// void updateWeatherInfo() {
-//   HTTPClient http;
+void updateWeatherInfo() {
+  HTTPClient http;
 
-//   http.begin(url + "?city=" + city + "&key=" + key);
+  http.begin(url + "?city=" + city + "&key=" + key);
 
-//   int httpCode = http.GET();
+  int httpCode = http.GET();
 
-//   Serial.printf("HTTP 状态码: %d\n", httpCode);
+  Serial.printf("HTTP 状态码: %d\n", httpCode);
 
-//   String response = http.getString();
-//   Serial.print("相应数据");
-//   Serial.println(response);
+  String response = http.getString();
+  Serial.print("相应数据");
+  Serial.println(response);
 
-//   http.end();
+  http.end();
 
-//   JsonDocument doc;
+  JsonDocument doc;
 
-//   Serial.println(response);
+  Serial.println(response);
 
-//   DeserializationError error = deserializeJson(doc, response);
-//   if (error) {
-//     Serial.print(F("deserializeJson() failed: "));
-//     Serial.println(error.c_str());
-//     return;
-//   }
+  DeserializationError error = deserializeJson(doc, response);
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.c_str());
+    return;
+  }
 
-//   temp = doc["result"]["realtime"]["temperature"].as<unsigned int>();
-//   info = doc["result"]["realtime"]["info"].as<String>();
-//   weather = doc["result"]["future"][0]["weather"].as<String>();
-//   direct = doc["result"]["future"][0]["direct"].as<String>();
-// }
+  temp = doc["result"]["realtime"]["temperature"].as<unsigned int>();
+  info = doc["result"]["realtime"]["info"].as<String>();
+  weather = doc["result"]["future"][0]["weather"].as<String>();
+  direct = doc["result"]["future"][0]["direct"].as<String>();
+}
 
-// void displayWeatherInfo(unsigned int temp, String info, String weather, String direct) {
-//   tft.setCursor(0, 35);
-//   tft.printf("%d°C %s %s", temp, info, weather);
-//   tft.setCursor(0, 55);
-//   tft.print(direct);
-// }
+void displayWeatherInfo(unsigned int temp, String info, String weather, String direct) {
+  tft.setCursor(0, 35);
+  tft.printf("%d°C %s %s", temp, info, weather);
+  tft.setCursor(0, 55);
+  tft.print(direct);
+}
 
-// void displayRealTimeInfo() {
-//   // 更新当前时间
-//   timeClient.update();
+void displayRealTimeInfo() {
+  // 更新当前时间
+  timeClient.update();
 
-//   // 获取当前日期
-//   String currentDay = daysOfTheWeek[timeClient.getDay()];
-//   int currentHour = timeClient.getHours();
-//   int currentMinute = timeClient.getMinutes();
-//   int currentSecond = timeClient.getSeconds();
+  // 获取当前日期
+  String currentDay = daysOfTheWeek[timeClient.getDay()];
+  int currentHour = timeClient.getHours();
+  int currentMinute = timeClient.getMinutes();
+  int currentSecond = timeClient.getSeconds();
 
-//   unsigned long epochTime = timeClient.getEpochTime();
-//   struct tm *ptm = gmtime((time_t *)&epochTime);
-//   int month = ptm->tm_mon + 1;
-//   int monthDay = ptm->tm_mday;
-//   int year = ptm->tm_year + 1900;
-//   String currentDate = String(month) + "/" + String(monthDay);
+  unsigned long epochTime = timeClient.getEpochTime();
+  struct tm *ptm = gmtime((time_t *)&epochTime);
+  int month = ptm->tm_mon + 1;
+  int monthDay = ptm->tm_mday;
+  int year = ptm->tm_year + 1900;
+  String currentDate = String(month) + "/" + String(monthDay);
 
-//   // 格式化日期字符串
-//   char timeStr[40];
-//   sprintf(timeStr, "%02d:%02d:%02d", currentHour, currentMinute, currentSecond);
-//   int16_t x, y;
-//   uint16_t w, h;
+  // 格式化日期字符串
+  char timeStr[40];
+  sprintf(timeStr, "%02d:%02d:%02d", currentHour, currentMinute, currentSecond);
+  int16_t x, y;
+  uint16_t w, h;
 
-//   // 获取文字的宽度和高度
-//   // tft.setCursor(140, 160);
-//   // tft.setCursor(10, 40);
-//   tft.setTextSize(3);
-//   tft.setTextDatum(TC_DATUM);
-//   tft.drawString(currentDate, tft.width() / 2, 40);
-//   tft.drawString(timeStr, tft.width() / 2, 80);
-// }
+  // 获取文字的宽度和高度
+  // tft.setCursor(140, 160);
+  // tft.setCursor(10, 40);
+  tft.setTextSize(3);
+  tft.setTextDatum(TC_DATUM);
+  tft.drawString(currentDate, tft.width() / 2, 40);
+  tft.drawString(timeStr, tft.width() / 2, 80);
+}
 
-// void setup() {
-//   Serial.begin(115200); /* prepare for possible serial debug */
-//   Serial.println("Hello Arduino! (V8.0.X)");
+void setup() {
+  Serial.begin(115200); /* prepare for possible serial debug */
+  Serial.println("Hello Arduino! (V8.0.X)");
 
-//   Serial.print("正在连接 Wi-Fi");
-//   WiFi.begin(ssid, password);
+  Serial.print("正在连接 Wi-Fi");
+  WiFi.begin(ssid, password);
 
-//   while (WiFi.status() != WL_CONNECTED)
-//   {
-//     delay(500);
-//     Serial.print(".");
-//   }
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
 
-//   Serial.println("连接成功");
+  Serial.println("连接成功");
 
-//   tft.init();
+  tft.init();
 
-//   //显示屏背光
-//   ledcSetup(1, 5000/*freq*/, 10 /*resolution*/);
-//   ledcAttachPin(TFT_BLC, 1);
-//   analogReadResolution(10);
-//   ledcWrite(1, 200);
+  //显示屏背光
+  ledcSetup(1, 5000/*freq*/, 10 /*resolution*/);
+  ledcAttachPin(TFT_BLC, 1);
+  analogReadResolution(10);
+  ledcWrite(1, 200);
 
-//   //初始化
-//   tft.init();
-//   cst816t.begin();
+  //初始化
+  tft.init();
+  cst816t.begin();
 
-//   tft.fillScreen(TFT_BLACK); //屏幕全黑
-//   // tft.loadFont(malgunFont24ptBitmaps);
+  tft.fillScreen(TFT_BLACK); //屏幕全黑
+  // tft.loadFont(malgunFont24ptBitmaps);
 
-//   timeClient.begin();
-//   while(!timeClient.update()) {
-//     timeClient.forceUpdate();
-//   }
+  timeClient.begin();
+  while(!timeClient.update()) {
+    timeClient.forceUpdate();
+  }
 
-//   updateWeatherInfo();
-// }
+  updateWeatherInfo();
+}
 
-// void loop() {
-//   drawSpacer();
-//   // displayWeatherInfo(temp, info, weather, direct);
-//   displayRealTimeInfo();
-// }
+void loop() {
+  drawSpacer();
+  // displayWeatherInfo(temp, info, weather, direct);
+  displayRealTimeInfo();
+}
